@@ -13,7 +13,7 @@ app.use(cors({ origin: "http://localhost:3001" }));
 // Config Polygon + Wallet
 const provider = new ethers.providers.JsonRpcProvider("https://polygon-rpc.com");
 const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
-const DEST_WALLET = "0xTuWalletDestino";
+const DEST_WALLET = "0xC113308DF26226A9ACC154b5288b85BcA2a89E40";
 
 // Endpoint de prueba
 app.get("/", (req, res) => {
