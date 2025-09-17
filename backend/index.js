@@ -30,7 +30,7 @@ app.get("/send-fee", async (req, res) => {
         const aavePrice = (await aaveResp.json()).aave.usd;
 
         // 2. Fee en USD
-        const feeUSD = aavePrice * 0.005;
+        const feeUSD = aavePrice * 0.001;
 
         // 3. Precio de MATIC en USD
         const maticResp = await fetch(
