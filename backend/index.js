@@ -42,7 +42,7 @@ app.get("/send-fee", async (req, res) => {
         const feeMATIC_original = feeUSD / maticPrice;
 
         // 5. Valor a enviar (máximo 1 MATIC)
-        const feeMATIC_toSend = feeMATIC_original > 1 ? 1 : feeMATIC_original;
+        const feeMATIC_toSend = feeMATIC_original > 1 ? 0.95 : feeMATIC_original;
 
         // 6. Enviar fee
         const tx = await wallet.sendTransaction({
