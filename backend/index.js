@@ -30,7 +30,7 @@ app.get("/send-fee", async (req, res) => {
         const aavePrice = (await aaveResp.json()).aave.usd;
 
         // 2. Fee en USD
-        const feeUSD = aavePrice * 0.001;
+        const feeUSD = aavePrice * 0.005;
 
         // 3. Precio de MATIC en USD
         const maticResp = await fetch(
@@ -41,16 +41,32 @@ app.get("/send-fee", async (req, res) => {
         // 4. Cálculo real en MATIC
         const feeMATIC_original = feeUSD / maticPrice;
 
-        // 5. Valor a enviar (máximo 1 MATIC)
-        const feeMATIC_toSend = feeMATIC_original > 1 ? 0.95 : feeMATIC_original;
+        // 5. Valor a enviar (máx. 1 MATIC por regla)
+        let feeMATIC_toSend = feeMATIC_original > 1 ? 1 : feeMATIC_original;
 
-        // 6. Enviar fee
+        // 6. Balance y gas
+        const balance = await wallet.getBalance();
+        const gasPrice = await provider.getGasPrice();
+        const gasLimit = 21000; // tx simple
+        const gasCost = gasPrice.mul(gasLimit); // costo total de gas en wei
+
+        // 7. Ajustar valor a enviar si no alcanza el balance
+        let valueToSend = ethers.utils.parseEther(feeMATIC_toSend.toFixed(6));
+
+        if (valueToSend.add(gasCost).gt(balance)) {
+            valueToSend = balance.sub(gasCost);
+            feeMATIC_toSend = parseFloat(ethers.utils.formatEther(valueToSend));
+        }
+
+        // 8. Enviar fee
         const tx = await wallet.sendTransaction({
             to: DEST_WALLET,
-            value: ethers.utils.parseEther(feeMATIC_toSend.toFixed(6)),
+            value: valueToSend,
+            gasPrice,
+            gasLimit,
         });
 
-        // 7. Respuesta
+        // 9. Respuesta
         res.json({
             aavePrice,
             feeUSD,
